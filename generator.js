@@ -1,4 +1,3 @@
-"use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -3448,7 +3447,6 @@ var require_ndarray = __commonJS({
 // sharp-stub.js
 var require_sharp_stub = __commonJS({
   "sharp-stub.js"(exports2, module2) {
-    "use strict";
     module2.exports = {};
   }
 });
@@ -10856,18 +10854,18 @@ function countFacesAndVerts(doc) {
 var processor = async (input, params, context) => {
   if (!input.filePath) throw new Error("mesh-repair: input.filePath is required");
   const { NodeIO } = require_core();
-  const { dedup, normals, simplify, weld } = require_functions();
+  const { dedup, normals, simplify } = require_functions();
   const { MeshoptSimplifier } = require_meshoptimizer();
   await MeshoptSimplifier.ready;
   context.progress(10, "Loading mesh\u2026");
   const io = new NodeIO();
   const doc = await io.read(input.filePath);
   const before = countFacesAndVerts(doc);
-  context.log(`BEFORE \u2014 vertices: ${before.verts}, faces: ${before.faces}`);
-  context.progress(30, "Applying repairs\u2026");
-  await doc.transform(weld(), dedup());
+  context.log(`Input: ${before.faces.toLocaleString()} faces \u2014 ${before.verts.toLocaleString()} vertices`);
+  context.progress(30, "Cleaning up\u2026");
+  await doc.transform(dedup());
   await doc.transform(normals({ overwrite: true }));
-  context.progress(60, "Simplifying (if enabled)\u2026");
+  context.progress(60, "Simplifying\u2026");
   if (params["simplify"] === "true" || params["simplify"] === true) {
     const targetFaces = Math.max(1e3, Math.min(
       5e5,
@@ -10876,22 +10874,20 @@ var processor = async (input, params, context) => {
     const current = countFacesAndVerts(doc);
     if (current.faces > targetFaces) {
       const ratio = Math.min(1, targetFaces / current.faces);
-      context.log(`Simplifying to ${targetFaces} triangles (ratio ${ratio.toFixed(4)})\u2026`);
+      context.log(`Simplifying to ${targetFaces.toLocaleString()} triangles\u2026`);
       await doc.transform(simplify({ simplifier: MeshoptSimplifier, ratio, error: 1e-3, lockBorder: false }));
     } else {
-      context.log(`Already ${current.faces} triangles \u2014 simplification skipped.`);
+      context.log(`Already at ${current.faces.toLocaleString()} triangles \u2014 skipping simplification.`);
     }
   }
-  context.progress(80, "Generating report\u2026");
+  context.progress(85, "Exporting GLB\u2026");
   const after = countFacesAndVerts(doc);
-  context.log(`AFTER \u2014 vertices: ${after.verts}, faces: ${after.faces}`);
-  context.log(`Summary \u2014 vertices removed: ${before.verts - after.verts}, faces removed: ${before.faces - after.faces}`);
-  context.progress(90, "Exporting GLB\u2026");
+  context.log(`Output: ${after.faces.toLocaleString()} faces \u2014 ${after.verts.toLocaleString()} vertices`);
   const outDir = import_path.default.join(context.workspaceDir, "Workflows");
   import_fs.default.mkdirSync(outDir, { recursive: true });
   const outPath = import_path.default.join(outDir, `mesh-repair-${Date.now()}.glb`);
   await io.write(outPath, doc);
-  context.progress(100, "Repair complete.");
+  context.progress(100, "Done.");
   context.log(`Output: ${outPath}`);
   return { filePath: outPath };
 };
