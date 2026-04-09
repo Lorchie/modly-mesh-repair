@@ -1,6 +1,6 @@
 # Mesh Repair — Modly Extension
 
-Automatically repairs common defects in 3D meshes (`.glb`), with optional polygon reduction powered by [meshoptimizer](https://github.com/zeux/meshoptimizer).
+Cleans up and optionally reduces polygon count on any 3D mesh (`.glb`) using [glTF-Transform](https://github.com/donmccurdy/glTF-Transform) and [meshoptimizer](https://github.com/zeux/meshoptimizer).
 
 **Extension ID:** `mesh-repair`  
 **Version:** 1.0.0  
@@ -13,11 +13,9 @@ Automatically repairs common defects in 3D meshes (`.glb`), with optional polygo
 
 ```
 GLB input
-  └─ 1. Weld     ──  merges duplicate vertices
-  └─ 2. Dedup    ──  removes redundant accessors and data
-  └─ 3. Normals  ──  recomputes smooth vertex normals
-  └─ 4. Simplify (optional)  ──  reduces triangle count via meshoptimizer
-  └─ 5. GLB export
+  └─ 1. Load GLB
+  └─ 2. Simplify (optional)  ──  reduces triangle count via meshoptimizer
+  └─ 3. GLB export
 ```
 
 ---
@@ -26,11 +24,41 @@ GLB input
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `simplify` | `false` | Enable polygon reduction after repairs |
+| `simplify` | `false` | Enable polygon reduction |
 | `target_faces` | `50 000` | Target triangle count when simplification is enabled (1 000 – 500 000) |
 
-- Weld, dedup and normals are always applied — simplification is optional.
+### Tuning tips
+
 - If the mesh is already below `target_faces`, simplification is skipped automatically.
+- Keep `target_faces` above 10 000 to preserve fine surface detail.
+
+---
+
+## When to use
+
+| Use case | Result |
+|----------|--------|
+| Dense AI-generated mesh | Reduce face count for real-time or export |
+| Mesh too heavy for downstream tools | Fast CPU decimation with quality preservation |
+
+## When NOT to use
+
+| Use case | Why |
+|----------|-----|
+| Non-manifold or broken geometry | meshoptimizer expects valid mesh topology |
+| Organic meshes needing retopology | Use Instant Remesh instead |
+
+---
+
+## Requirements
+
+Dependencies are bundled directly into `generator.js` — no installation required.
+
+| Package | License | Description |
+|---------|---------|-------------|
+| [`@gltf-transform/core`](https://github.com/donmccurdy/glTF-Transform) | MIT | glTF 2.0 read/write |
+| [`@gltf-transform/functions`](https://github.com/donmccurdy/glTF-Transform) | MIT | Mesh processing functions |
+| [`meshoptimizer`](https://github.com/zeux/meshoptimizer) | MIT | High-performance mesh simplification |
 
 ---
 
@@ -38,8 +66,8 @@ GLB input
 
 ```
 modly-mesh-repair/
-├── manifest.json   # Modly manifest
-├── generator.js    # Bundled processor (all deps included)
+├── manifest.json   # Modly manifest (node declaration, parameters)
+├── generator.js    # Bundled processor (all deps included, no install needed)
 └── .gitignore
 ```
 
@@ -56,5 +84,5 @@ modly-mesh-repair/
 
 ## License
 
-meshoptimizer — [MIT](https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md)  
-glTF-Transform — [MIT](https://github.com/donmccurdy/glTF-Transform/blob/main/LICENSE)
+glTF-Transform — [MIT](https://github.com/donmccurdy/glTF-Transform/blob/main/LICENSE)  
+meshoptimizer — [MIT](https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md)
