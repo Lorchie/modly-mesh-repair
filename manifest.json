@@ -1,0 +1,39 @@
+{
+  "id": "mesh-repair",
+  "name": "Mesh Repair",
+  "type": "process",
+  "entry": "generator.js",
+  "version": "1.0.0",
+  "description": "Automatically analyzes and repairs defects in 3D meshes.",
+  "nodes": [
+    {
+      "id": "repair",
+      "name": "Mesh Repair",
+      "input": "mesh",
+      "output": "mesh",
+      "params_schema": [
+        {
+          "id": "simplify",
+          "label": "Simplify mesh",
+          "type": "select",
+          "default": "false",
+          "tooltip": "Reduces triangle count using meshoptimizer.",
+          "options": [
+            { "value": "true",  "label": "Yes" },
+            { "value": "false", "label": "No" }
+          ]
+        },
+        {
+          "id": "target_faces",
+          "label": "Target triangle count",
+          "type": "int",
+          "default": 50000,
+          "min": 1000,
+          "max": 500000,
+          "step": 1000,
+          "tooltip": "Target number of triangles after simplification."
+        }
+      ]
+    }
+  ]
+}
