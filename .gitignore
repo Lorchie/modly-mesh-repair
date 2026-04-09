@@ -1,3 +1,10 @@
 node_modules/
-generator.js
+package.json
+package-lock.json
+tsconfig.json
+generator.ts
+sharp-stub.js
+setup.py
+__pycache__/
+*.pyc
 .claude/
