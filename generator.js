@@ -10854,7 +10854,7 @@ function countFacesAndVerts(doc) {
 var processor = async (input, params, context) => {
   if (!input.filePath) throw new Error("mesh-repair: input.filePath is required");
   const { NodeIO } = require_core();
-  const { dedup, normals, simplify } = require_functions();
+  const { simplify } = require_functions();
   const { MeshoptSimplifier } = require_meshoptimizer();
   await MeshoptSimplifier.ready;
   context.progress(10, "Loading mesh\u2026");
@@ -10862,9 +10862,6 @@ var processor = async (input, params, context) => {
   const doc = await io.read(input.filePath);
   const before = countFacesAndVerts(doc);
   context.log(`Input: ${before.faces.toLocaleString()} faces \u2014 ${before.verts.toLocaleString()} vertices`);
-  context.progress(30, "Cleaning up\u2026");
-  await doc.transform(dedup());
-  await doc.transform(normals({ overwrite: true }));
   context.progress(60, "Simplifying\u2026");
   if (params["simplify"] === "true" || params["simplify"] === true) {
     const targetFaces = Math.max(1e3, Math.min(
@@ -10877,7 +10874,7 @@ var processor = async (input, params, context) => {
       context.log(`Simplifying to ${targetFaces.toLocaleString()} triangles\u2026`);
       await doc.transform(simplify({ simplifier: MeshoptSimplifier, ratio, error: 1e-3, lockBorder: false }));
     } else {
-      context.log(`Already at ${current.faces.toLocaleString()} triangles \u2014 skipping simplification.`);
+      context.log(`Already at ${current.faces.toLocaleString()} triangles \u2014 skipping.`);
     }
   }
   context.progress(85, "Exporting GLB\u2026");
