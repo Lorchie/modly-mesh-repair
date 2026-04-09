@@ -5,7 +5,7 @@ with optional polygon count simplification powered by [meshoptimizer](https://gi
 
 **Extension ID:** `mesh-repair`  
 **Version:** 1.0.0  
-**Author:** Guillaume  
+**Author:** Lorchie  
 **Runtime:** Node.js (CPU only)
 
 ---
